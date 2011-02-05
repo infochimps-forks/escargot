@@ -19,6 +19,14 @@ namespace :escargot do
       Escargot::DistributedIndexing.create_index_for_model(model)
     end
   end
+
+  desc "sets up mappings"
+  task :mappings, :models, :needs => [:environment, :load_all_models] do |t, args|
+    each_indexed_model(args) do |model|
+      next unless model.mapping
+      Escargot.elastic_search_client.update_mapping(model.mapping, :index => model.index_name, :type => model.elastic_search_type)
+    end
+  end
   
   desc "prunes old index versions for this models"
   task :prune_versions, :models, :needs => [:environment, :load_all_models] do |t, args|
