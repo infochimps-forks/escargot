@@ -12,11 +12,11 @@ class AdminIndexTest < Test::Unit::TestCase
     index = User.index_name
     3.times.each do
       Escargot::LocalIndexing.create_index_for_model(User)
-      @local_index = $elastic_search_client.current_index_version(index)
+      @local_index = Escargot.elastic_search_client.current_index_version(index)
     end
-    assert $elastic_search_client.index_versions(index).size > 1
-    assert $elastic_search_client.index_versions(index).include? $elastic_search_client.current_index_version(index)
-    $elastic_search_client.prune_index_versions(index)
-    assert $elastic_search_client.index_versions(index).size == 1
+    assert Escargot.elastic_search_client.index_versions(index).size > 1
+    assert Escargot.elastic_search_client.index_versions(index).include? Escargot.elastic_search_client.current_index_version(index)
+    Escargot.elastic_search_client.prune_index_versions(index)
+    assert Escargot.elastic_search_client.index_versions(index).size == 1
   end
 end

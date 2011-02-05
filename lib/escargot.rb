@@ -20,4 +20,12 @@ module Escargot
   def self.queue_backend
     @queue ||= Escargot::QueueBackend::Rescue.new
   end
+
+  def self.elastic_search_client
+    @elastic_search_client ||= ElasticSearch.new('localhost:9200')
+  end
+
+  def self.elastic_search_client= new_client
+    @elastic_search_client = new_client
+  end
 end

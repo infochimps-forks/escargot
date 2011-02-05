@@ -57,7 +57,7 @@ module Escargot
         if query.kind_of?(Hash)
           query = {:query => query}
         end
-        $elastic_search_client.search(query, options.merge({:index => self.index_name, :type => elastic_search_type}))
+        Escargot.elastic_search_client.search(query, options.merge({:index => self.index_name, :type => elastic_search_type}))
       end
 
       # search returns a will_paginate collection of ActiveRecord objects for the search results
@@ -76,7 +76,7 @@ module Escargot
 
       # counts the number of results for this query.
       def search_count(query = "*", options = {})
-        $elastic_search_client.count(query, options.merge({:index => self.index_name, :type => elastic_search_type}))
+        Escargot.elastic_search_client.count(query, options.merge({:index => self.index_name, :type => elastic_search_type}))
       end
 
       def facets(fields_list, options = {})
@@ -94,7 +94,7 @@ module Escargot
           options[:facets][field] = {:terms => {:field => field, :size => size}}
         end
 
-        hits = $elastic_search_client.search(options, {:index => self.index_name, :type => elastic_search_type})
+        hits = Escargot.elastic_search_client.search(options, {:index => self.index_name, :type => elastic_search_type})
         out = {}
         
         fields_list.each do |field|
@@ -112,14 +112,14 @@ module Escargot
       #
       # http://www.elasticsearch.com/docs/elasticsearch/rest_api/admin/indices/refresh/
       def refresh_index(index_version = nil)
-        $elastic_search_client.refresh(index_version || index_name)
+        Escargot.elastic_search_client.refresh(index_version || index_name)
       end
       
       # creates a new index version for this model and sets the mapping options for the type
       def create_index_version
-        index_version = $elastic_search_client.create_index_version(@index_name, @index_options)
+        index_version = Escargot.elastic_search_client.create_index_version(@index_name, @index_options)
         if @mapping
-          $elastic_search_client.update_mapping(@mapping, :index => index_version, :type => elastic_search_type)
+          Escargot.elastic_search_client.update_mapping(@mapping, :index => index_version, :type => elastic_search_type)
         end
         index_version
       end
@@ -127,13 +127,13 @@ module Escargot
       # deletes all index versions for this model
       def delete_index
         # deletes any index version
-        $elastic_search_client.index_versions(index_name).each{|index_version|
-          $elastic_search_client.delete_index(index_version)
+        Escargot.elastic_search_client.index_versions(index_name).each{|index_version|
+          Escargot.elastic_search_client.delete_index(index_version)
         }
         
         # and delete the index itself if it exists
         begin
-          $elastic_search_client.delete_index(index_name)
+          Escargot.elastic_search_client.delete_index(index_name)
         rescue ElasticSearch::RequestError
           # it's ok, this means that the index doesn't exist
         end
@@ -142,11 +142,11 @@ module Escargot
       def delete_id_from_index(id, options = {})
         options[:index] ||= self.index_name
         options[:type]  ||= elastic_search_type
-        $elastic_search_client.delete(id.to_s, options)
+        Escargot.elastic_search_client.delete(id.to_s, options)
       end
       
       def optimize_index
-        $elastic_search_client.optimize(index_name)
+        Escargot.elastic_search_client.optimize(index_name)
       end
       
       private
@@ -187,7 +187,7 @@ module Escargot
         options[:type]  ||= self.class.name.underscore.singularize.gsub(/\//,'-')
         options[:id]    ||= self.id.to_s
         
-        $elastic_search_client.index(
+        Escargot.elastic_search_client.index(
           self.respond_to?(:indexed_json_document) ? self.indexed_json_document : self.to_json,
           options
         )

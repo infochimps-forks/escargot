@@ -23,7 +23,7 @@ namespace :escargot do
   desc "prunes old index versions for this models"
   task :prune_versions, :models, :needs => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
-      $elastic_search_client.prune_index_versions(model.index_name)
+      Escargot.elastic_search_client.prune_index_versions(model.index_name)
     end
   end
   

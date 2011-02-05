@@ -12,7 +12,7 @@ module Escargot
         end
       end
 
-      $elastic_search_client.deploy_index_version(model.index_name, index_version)
+      Escargot.elastic_search_client.deploy_index_version(model.index_name, index_version)
     end
   end
 

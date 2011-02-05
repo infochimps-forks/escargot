@@ -50,7 +50,7 @@ module Escargot
     class DeployNewVersion
       @queue = :indexing
       def self.perform(index, index_version)
-        $elastic_search_client.deploy_index_version(index, index_version)
+        Escargot.elastic_search_client.deploy_index_version(index, index_version)
       end
     end
   end
