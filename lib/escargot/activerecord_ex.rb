@@ -176,9 +176,15 @@ module Escargot
       end
 
       module InstanceMethods
+
+        # override this method to skip indexing on an instance by instance basis
+        def skip_indexing?
+          false
+        end
         
         # updates the index using the appropiate policy
         def update_index
+          return if skip_indexing?
           if self.class.update_index_policy == :immediate_with_refresh
             local_index_in_elastic_search(:refresh => true)
           elsif self.class.update_index_policy == :enqueue
