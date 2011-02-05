@@ -24,8 +24,28 @@ module Escargot
   def self.elastic_search_client
     @elastic_search_client ||= ElasticSearch.new('localhost:9200')
   end
-
   def self.elastic_search_client= new_client
     @elastic_search_client = new_client
   end
+
+  def self.index_name
+    @index_name ||= "escargot_#{Rails.env}"
+  end
+  def self.index_name= new_index_name
+    @index_name = new_index_name
+  end
+
+  def self.index_options
+    @index_options ||= {}
+  end
+  def self.index_options= new_options
+    new_options.symbolize_keys!
+    @index_options = new_options
+  end
+
+  def self.allowed_index_policies
+    [:immediate, :immediate_with_refresh, :enqueue]
+  end
+
+  Error = Class.new(StandardError)
 end
