@@ -80,9 +80,6 @@ module Escargot
       # search_hits returns a raw ElasticSearch::Api::Hits object for the search results
       # see #search for the valid options
       def search_hits(query, options = {})
-        if query.kind_of?(Hash)
-          query = {:query => query}
-        end
         Escargot.elastic_search_client.search(query, options.merge({:index => self.index_name, :type => elastic_search_type}))
       end
 
