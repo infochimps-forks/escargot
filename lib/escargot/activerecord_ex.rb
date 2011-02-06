@@ -91,7 +91,11 @@ module Escargot
       # record that has been deleted on the database
       def search(query, options = {})
         hits = search_hits(query, options)
-        hits_ar = hits.map{ |hit| hit.to_activerecord(options[:find_options]) }
+        if hits.map { |hit| hit._type }.uniq.size == 1
+          hits_ar = hits.first._type.to_s.classify.constantize.find(:all, :conditions => { :id => hits.map { |hit| hit._id.to_i} })
+        else
+          hits_ar = hits.map{ |hit| hit.to_activerecord(options[:find_options]) }
+        end
         results = WillPaginate::Collection.new(hits.current_page, hits.per_page, hits.total_entries)
         results.replace(hits_ar)
         results
