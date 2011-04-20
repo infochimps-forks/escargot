@@ -231,6 +231,27 @@ module Escargot
           
         end
 
+        def more_like_this options={}
+          raise Escargot::Error.new("Must specify an Array :fields to match against") unless options[:fields] && (!options[:fields].empty?) && options[:fields].is_a?(Array)
+          options[:like_text] ||= options[:fields].map { |f| send(f).to_s }.join(' ')
+          allowed_mlt_options = %w[fields like_text percent_terms_to_match min_term_freq max_query_terms stop_words min_doc_freq max_doc_freq min_word_len max_word_len boost_terms boost].map(&:to_sym)
+          mlt_options = {}.tap do |o|
+            options.each_pair { |k, v| o[k] = v if allowed_mlt_options.include?(k) }
+          end
+          self.class.search({:query => {:more_like_this => mlt_options}}, options)
+        end
+
+        def fuzzy_like_this options={}
+          raise Escargot::Error.new("Must specify an Array :fields to match against") unless options[:fields] && (!options[:fields].empty?) && options[:fields].is_a?(Array)
+          options[:like_text] ||= options[:fields].map { |f| send(f).to_s }.join(' ')
+          allowed_flt_options = %w[fields like_text ignore_tf max_query_terms boost].map(&:to_sym)
+          flt_options = {}.tap do |o|
+            options.each_pair { |k, v| o[k] = v if allowed_flt_options.include?(k) }
+          end
+          self.class.search({:query => {:fuzzy_like_this => flt_options}}, options)
+        end
+        
+        
       end
     end
   end
