@@ -22,7 +22,12 @@ module Escargot
   end
 
   def self.elastic_search_client
-    @elastic_search_client ||= ElasticSearch.new('localhost:9200')
+    return @elastic_search_client unless @elastic_search_client.nil?
+    begin
+      @elastic_search_client = ElasticSearch.new('localhost:9200')
+    rescue ElasticSearch::ConnectionFailed
+      nil
+    end
   end
   def self.elastic_search_client= new_client
     @elastic_search_client = new_client

@@ -165,7 +165,11 @@ module Escargot
       def delete_id_from_index(id, options = {})
         options[:index] ||= self.index_name
         options[:type]  ||= elastic_search_type
-        Escargot.elastic_search_client.delete(id.to_s, options)
+        if Escargot.elastic_search_client
+          Escargot.elastic_search_client.delete(id.to_s, options)
+        else
+          Rails.logger.debug("Could not delete #{options[:type]} #{id}; no ElasticSearch client")
+        end
       end
       
       def optimize_index
@@ -220,8 +224,12 @@ module Escargot
           options[:index] ||= self.class.index_name
           options[:type]  ||= self.class.elastic_search_type
           options[:id]    ||= self.id.to_s
-          
-          Escargot.elastic_search_client.index(self.json_doc_to_index, options.merge(indexing_options))
+
+          if Escargot.elastic_search_client
+            Escargot.elastic_search_client.index(self.json_doc_to_index, options.merge(indexing_options))
+          else
+            Rails.logger.debug("Could not index #{self.class} #{id}; no ElasticSearch client")
+          end
           
           ## !!!!! passing :refresh => true should make ES auto-refresh only the affected
           ## shards but as of Oct 25 2010 with ES 0.12 && rubberband 0.0.2 that's not the case
