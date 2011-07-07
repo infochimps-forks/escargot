@@ -3,9 +3,11 @@
 #   # Task goes here
 # end
 
+# tasWARNING: 'task :t, arg, :needs => [deps]' is deprecated.  Please use 'task :t, [args] => [deps]' instead.
+
 namespace :escargot do
   desc "indexes the models"
-  task :index, :models, :needs => [:environment, :load_all_models] do |t, args|
+  task :index, [:models] => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
       puts "Indexing #{model}"
       Escargot::LocalIndexing.create_index_for_model(model)
@@ -13,7 +15,7 @@ namespace :escargot do
   end
 
   desc "indexes the models"
-  task :distributed_index, :models, :needs => [:environment, :load_all_models] do |t, args|
+  task :distributed_index, [:models] => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
       puts "Indexing #{model}"
       Escargot::DistributedIndexing.create_index_for_model(model)
@@ -21,7 +23,7 @@ namespace :escargot do
   end
 
   desc "sets up mappings"
-  task :mappings, :models, :needs => [:environment, :load_all_models] do |t, args|
+  task :mappings, [:models] => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
       next unless model.mapping
       Escargot.elastic_search_client.update_mapping(model.mapping, :index => model.index_name, :type => model.elastic_search_type)
@@ -29,7 +31,7 @@ namespace :escargot do
   end
   
   desc "prunes old index versions for this models"
-  task :prune_versions, :models, :needs => [:environment, :load_all_models] do |t, args|
+  task :prune_versions, [:models] => [:environment, :load_all_models] do |t, args|
     each_indexed_model(args) do |model|
       Escargot.elastic_search_client.prune_index_versions(model.index_name)
     end
