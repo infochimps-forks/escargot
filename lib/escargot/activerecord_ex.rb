@@ -204,7 +204,11 @@ module Escargot
           elsif self.class.update_index_policy == :enqueue
             Resque.enqueue(DistributedIndexing::ReIndexDocuments, self.class.to_s, [self.id])
           else
-            self.class.delete_id_from_index(self.id)
+            begin
+              self.class.delete_id_from_index(self.id)
+            rescue ElasticSearch::RequestError => e
+              nil
+            end
           end
         end
 
